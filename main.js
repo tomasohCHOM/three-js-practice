@@ -1,3 +1,4 @@
+import "./style.css";
 import * as THREE from "three";
 
 const scene = new THREE.Scene();
@@ -9,8 +10,9 @@ const camera = new THREE.PerspectiveCamera(
 );
 
 const renderer = new THREE.WebGLRenderer({
-  canvas: document.getElementById(canvas),
+  canvas: document.getElementById("canvas"),
 });
+
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setAnimationLoop(animate);
 document.body.appendChild(renderer.domElement);
@@ -28,20 +30,3 @@ function animate() {
 
   renderer.render(scene, camera);
 }
-
-function moveCamera() {
-  const t = document.body.getBoundingClientRect().top;
-  moon.rotation.x += 0.05;
-  moon.rotation.y += 0.075;
-  moon.rotation.z += 0.05;
-
-  jeff.rotation.y += 0.01;
-  jeff.rotation.z += 0.01;
-
-  camera.position.z = t * -0.01;
-  camera.position.x = t * -0.0002;
-  camera.rotation.y = t * -0.0002;
-}
-
-document.body.onscroll = moveCamera;
-moveCamera();
