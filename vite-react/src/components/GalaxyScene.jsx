@@ -6,6 +6,7 @@ import { ColladaLoader } from "three/examples/jsm/loaders/ColladaLoader.js";
 
 function GalaxyBackground() {
   const texture = useLoader(THREE.TextureLoader, "/space.png");
+  texture.colorSpace = THREE.SRGBColorSpace;
   const { scene } = useThree();
   useEffect(() => {
     scene.background = texture;
@@ -16,7 +17,28 @@ function GalaxyBackground() {
 function Planet() {
   const path = "/galaxy/HeavensDoorBlackHolePlanet.dae";
   const model = useLoader(ColladaLoader, path);
-  return <primitive object={model.scene} dispose={null} />;
+
+  useEffect(() => {
+    model.scene.traverse((child) => {
+      if (child.isMesh) {
+        child.material = new THREE.MeshStandardMaterial({
+          color: 0xffffff, // White color, can change based on your preference
+          roughness: 0.5,
+          metalness: 0.5,
+        });
+      }
+    });
+  }, [model]);
+
+  return (
+    <primitive
+      object={model.scene}
+      position={[10, 0, 0]}
+      castShadow
+      receiveShadow
+      dispose={null}
+    />
+  );
 }
 
 export default function GalaxyScene() {
@@ -30,8 +52,14 @@ export default function GalaxyScene() {
         alignItems: "center",
       }}
     >
+      <ambientLight intensity={0.4} color={"#ffffff"} />
+      <directionalLight
+        intensity={100}
+        position={[10, 10, 10]}
+        color="#ffffff"
+        castShadow
+      />
       <OrbitControls enableZoom enablePan enableRotate dampingFactor={0.05} />
-      <ambientLight intensity={1} />
       <GalaxyBackground />
       <Planet />
     </Canvas>
