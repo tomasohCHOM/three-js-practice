@@ -2,6 +2,7 @@ import "./style.css";
 import * as THREE from "three";
 
 const scene = new THREE.Scene();
+scene.background = new THREE.Color("#f0f0f0");
 
 const aspect = window.innerWidth / window.innerHeight;
 const camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 100);
@@ -15,7 +16,7 @@ const cubeMaterial = new THREE.MeshStandardMaterial({
 const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
 scene.add(cube);
 
-const light = new THREE.SpotLight("#006769", 100);
+const light = new THREE.DirectionalLight(0xffffff, 20);
 light.position.set(1, 1, 1);
 scene.add(light);
 
