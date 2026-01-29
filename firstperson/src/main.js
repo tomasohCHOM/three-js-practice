@@ -1,6 +1,6 @@
 import "./style.css";
 import * as THREE from "three";
-import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";
+import { PointerLockControls } from "three/addons/controls/PointerLockControls";
 
 class FirstPersonDemo {
   constructor() {
@@ -10,7 +10,7 @@ class FirstPersonDemo {
 
     // Scene
     this.scene_ = new THREE.Scene();
-    this.scene_.background = new THREE.Color("#fff");
+    this.scene_.background = new THREE.Color("#a3f3ff");
 
     // Camera
     const fov = 75;
@@ -36,9 +36,10 @@ class FirstPersonDemo {
 
     // Floor
     const floorGeometry = new THREE.PlaneGeometry(2000, 2000, 100, 100);
-    floorGeometry.rotateX(-Math.PI / 2);
-    const floorMaterial = new THREE.MeshBasicMaterial({ color: "#32a7e6" });
+    const floorMaterial = new THREE.MeshBasicMaterial({ color: "#aaf2ca" });
     const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y -= 2;
     this.scene_.add(floor);
 
     document.body.appendChild(this.renderer_.domElement);
