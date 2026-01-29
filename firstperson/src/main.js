@@ -4,101 +4,112 @@ import { PointerLockControls } from "three/addons/controls/PointerLockControls.j
 
 class FirstPersonDemo {
   constructor() {
-    this._renderer = new THREE.WebGLRenderer();
-    this._renderer.setPixelRatio(window.devicePixelRatio);
-    this._renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer_ = new THREE.WebGLRenderer();
+    this.renderer_.setPixelRatio(window.devicePixelRatio);
+    this.renderer_.setSize(window.innerWidth, window.innerHeight);
 
     // Scene
-    this._scene = new THREE.Scene();
-    this._scene.background = new THREE.Color("#fff");
+    this.scene_ = new THREE.Scene();
+    this.scene_.background = new THREE.Color("#fff");
 
     // Camera
     const fov = 75;
     const aspect = window.innerWidth / window.innerHeight;
     const near = 1.0;
     const far = 100;
-    this._camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-    this._camera.position.z = 5;
+    this.camera_ = new THREE.PerspectiveCamera(fov, aspect, near, far);
+    this.camera_.position.z = 5;
 
     // Light
     let light = new THREE.AmbientLight(0xffffff, 10);
-    this._scene.add(light);
+    this.scene_.add(light);
     light = new THREE.DirectionalLight(0xffffff, 5);
     light.position.set(1, 1, 1);
 
-    this._scene.add(light);
+    this.scene_.add(light);
 
     // Cube
     const cubeGeometry = new THREE.BoxGeometry(2, 2, 2);
     const cubeMaterial = new THREE.MeshStandardMaterial({ color: "#468585" });
-    this._cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-    this._scene.add(this._cube);
+    this.cube_ = new THREE.Mesh(cubeGeometry, cubeMaterial);
+    this.scene_.add(this.cube_);
 
     // Floor
     const floorGeometry = new THREE.PlaneGeometry(2000, 2000, 100, 100);
     floorGeometry.rotateX(-Math.PI / 2);
     const floorMaterial = new THREE.MeshBasicMaterial({ color: "#32a7e6" });
     const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-    this._scene.add(floor);
+    this.scene_.add(floor);
 
-    document.body.appendChild(this._renderer.domElement);
-    window.addEventListener("resize", () => this._onWindowResize());
+    document.body.appendChild(this.renderer_.domElement);
+    window.addEventListener("resize", () => this.onWindowResize_());
 
-    this._RAF();
+    this.RAF_();
 
-    this._controls = new PointerLockControls(
-      this._camera,
-      this._renderer.domElement,
+    this.controls_ = new PointerLockControls(
+      this.camera_,
+      this.renderer_.domElement,
     );
 
-    this._scene.add(this._controls.object);
+    this.scene_.add(this.controls_.object);
 
-    this._keys = {};
-    this._prevTime = performance.now();
-    this._velocity = new THREE.Vector3();
-    this._direction = new THREE.Vector3();
+    this.keys_ = {};
+    this.prevTime_ = performance.now();
+    this.velocity_ = new THREE.Vector3();
+    this.direction_ = new THREE.Vector3();
 
-    document.addEventListener("keydown", (e) => this._onKeyDown(e));
-    document.addEventListener("keyup", (e) => this._onKeyUp(e));
+    document.addEventListener("keydown", (e) => this.onKeyDown_(e));
+    document.addEventListener("keyup", (e) => this.onKeyUp_(e));
   }
 
-  _onKeyDown(e) {
-    this._keys[e.code] = 1;
-    this._controls.lock();
-    console.log(this._velocity);
-    console.log(this._direction);
-    console.log(this._keys);
+  onKeyDown_(e) {
+    this.keys_[e.code] = 1;
+    this.controls_.lock();
+    console.log("Velocity:", this.velocity_);
+    console.log("Direction:", this.direction_);
+    console.log(this.keys_);
   }
 
-  _onKeyUp(e) {
-    this._keys[e.code] = 0;
+  onKeyUp_(e) {
+    this.keys_[e.code] = 0;
   }
 
-  _onWindowResize() {
-    this._camera.aspect = window.innerWidth / window.innerHeight;
-    this._camera.updateProjectionMatrix();
-    this._renderer.setSize(window.innerWidth, window.innerHeight);
+  onWindowResize_() {
+    this.camera_.aspect = window.innerWidth / window.innerHeight;
+    this.camera_.updateProjectionMatrix();
+    this.renderer_.setSize(window.innerWidth, window.innerHeight);
   }
 
-  _RAF() {
+  RAF_() {
     requestAnimationFrame((time) => {
-      this._cube.rotation.x += 0.01;
-      this._cube.rotation.y += 0.01;
+      this.cube_.rotation.x += 0.01;
+      this.cube_.rotation.y += 0.01;
 
-      const delta = (time - this._prevTime) / 1000;
+      const delta = (time - this.prevTime_) / 1000;
 
-      this._velocity.x -= this._velocity.x * 10.0 * delta;
-      this._velocity.z -= this._velocity.z * 10.0 * delta;
+      this.velocity_.x -= this.velocity_.x * 10.0 * delta;
+      this.velocity_.z -= this.velocity_.z * 10.0 * delta;
 
-      this._direction.z = this._keys["KeyW"] - this._keys.KeyS;
-      this._direction.x = this._keys.KeyD - this._keys.KeyA;
-      this._direction.normalize();
+      const forward = (this.keys_["KeyW"] || 0) - (this.keys_["KeyS"] || 0);
+      const right = (this.keys_["KeyD"] || 0) - (this.keys_["KeyA"] || 0);
 
-      this._controls.moveRight(-this._velocity.x * delta);
-      this._controls.moveForward(-this._velocity.z * delta);
+      this.direction_.set(right, 0, forward);
 
-      this._renderer.render(this._scene, this._camera);
-      this._RAF();
+      if (this.direction_.lengthSq() > 0) {
+        this.direction_.normalize();
+      }
+
+      const speed = 100.0;
+      this.velocity_.x -= this.direction_.x * speed * delta;
+      this.velocity_.z -= this.direction_.z * speed * delta;
+
+      this.controls_.moveRight(-this.velocity_.x * delta);
+      this.controls_.moveForward(-this.velocity_.z * delta);
+
+      this.renderer_.render(this.scene_, this.camera_);
+
+      this.prevTime_ = time;
+      this.RAF_();
     });
   }
 }
