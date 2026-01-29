@@ -50,11 +50,28 @@ class FirstPersonDemo {
       this._camera,
       this._renderer.domElement,
     );
-    this._controls.lookSpeed = 0.8;
-    this._controls.movementSpeed = 5;
-    this._controls.lock();
 
     this._scene.add(this._controls.object);
+
+    this._keys = {};
+    this._prevTime = performance.now();
+    this._velocity = new THREE.Vector3();
+    this._direction = new THREE.Vector3();
+
+    document.addEventListener("keydown", (e) => this._onKeyDown(e));
+    document.addEventListener("keyup", (e) => this._onKeyUp(e));
+  }
+
+  _onKeyDown(e) {
+    this._keys[e.code] = 1;
+    this._controls.lock();
+    console.log(this._velocity);
+    console.log(this._direction);
+    console.log(this._keys);
+  }
+
+  _onKeyUp(e) {
+    this._keys[e.code] = 0;
   }
 
   _onWindowResize() {
@@ -64,11 +81,23 @@ class FirstPersonDemo {
   }
 
   _RAF() {
-    requestAnimationFrame(() => {
+    requestAnimationFrame((time) => {
       this._cube.rotation.x += 0.01;
       this._cube.rotation.y += 0.01;
+
+      const delta = (time - this._prevTime) / 1000;
+
+      this._velocity.x -= this._velocity.x * 10.0 * delta;
+      this._velocity.z -= this._velocity.z * 10.0 * delta;
+
+      this._direction.z = this._keys["KeyW"] - this._keys.KeyS;
+      this._direction.x = this._keys.KeyD - this._keys.KeyA;
+      this._direction.normalize();
+
+      this._controls.moveRight(-this._velocity.x * delta);
+      this._controls.moveForward(-this._velocity.z * delta);
+
       this._renderer.render(this._scene, this._camera);
-      this._controls.moveForward(0.01);
       this._RAF();
     });
   }
